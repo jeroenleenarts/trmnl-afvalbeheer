@@ -2,13 +2,13 @@
 strategy: polling
 no_screen_padding: 'no'
 dark_mode: 'no'
-static_data:
+static_data: ''
 polling_verb: get
 framework_version: latest
 serverless_language: python
 polling_url: https://trmnl.com/custom_plugin_example_data.json?collector={{ collector }}&postcode={{ postcode }}&huisnummer={{ huisnummer }}&suffix={{ suffix }}&streetname={{ streetname }}&cityname={{ cityname }}&email={{ email }}
 polling_headers: ''
-polling_body:
+polling_body: ''
 id: 482665
 oauth_enabled: 'false'
 oauth_pkce_enabled: 'no'
