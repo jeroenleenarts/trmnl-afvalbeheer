@@ -1,0 +1,17 @@
+<div class="layout layout--col gap--small">
+  {% if error %}
+    <span class="title title--small">{{ error }}</span>
+  {% elsif next %}
+    <span class="label label--underline">{{ next.relative }}</span>
+    <span class="value value--large">{{ next.type }}</span>
+    <span class="label">{{ next.weekday }} {{ next.date_label }}</span>
+  {% else %}
+    <span class="title title--small">Geen ophaaldag</span>
+  {% endif %}
+</div>
+
+<div class="title_bar">
+  <img class="image image--adaptive" src="https://trmnl.com/images/plugins/trmnl--render.svg" alt="">
+  <span class="title">Afvalbeheer</span>
+  <span class="instance">{{ collector }}</span>
+</div>

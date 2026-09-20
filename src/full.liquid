@@ -1,0 +1,33 @@
+<div class="layout layout--col gap--xlarge">
+  {% if error %}
+    <div class="flex flex--col gap--small">
+      <span class="title">Geen kalender</span>
+      <span class="description">{{ error }}</span>
+    </div>
+  {% elsif next %}
+    <div class="flex flex--col gap--small">
+      <span class="label label--underline">Eerstvolgende</span>
+      <span class="value value--xxlarge">{{ next.type }}</span>
+      <span class="title">{{ next.weekday }} {{ next.date_label }}</span>
+      <span class="label label--large">{{ next.relative }}</span>
+    </div>
+
+    <div class="grid grid--wrap grid--min-32 gap--large">
+      {% for item in by_type %}
+        <div class="flex flex--col gap--xsmall">
+          <span class="label label--small">{{ item.type }}</span>
+          <span class="title title--small">{{ item.relative }}</span>
+          <span class="description">{{ item.weekday }} {{ item.date_label }}</span>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <span class="title">Geen ophaaldag gepland</span>
+  {% endif %}
+</div>
+
+<div class="title_bar">
+  <img class="image image--adaptive" src="https://trmnl.com/images/plugins/trmnl--render.svg" alt="">
+  <span class="title">Afvalbeheer</span>
+  <span class="instance">{{ collector }}{% if address %} · {{ address }}{% endif %}</span>
+</div>

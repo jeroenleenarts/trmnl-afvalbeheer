@@ -1,0 +1,31 @@
+<div class="layout layout--col gap--medium">
+  {% if error %}
+    <span class="title title--small">{{ error }}</span>
+  {% elsif next %}
+    <div class="flex flex--col gap--xsmall">
+      <span class="label label--underline">Eerstvolgende</span>
+      <span class="value value--xlarge">{{ next.type }}</span>
+      <span class="label">{{ next.weekday }} {{ next.date_label }} · {{ next.relative }}</span>
+    </div>
+
+    <div class="flex flex--col gap--small">
+      {% for item in upcoming limit:3 offset:1 %}
+        <div class="item{% if item.emphasis == 3 %} item--emphasis-3{% elsif item.emphasis == 2 %} item--emphasis-2{% endif %}">
+          <div class="meta"></div>
+          <div class="content">
+            <span class="title title--small">{{ item.type }}</span>
+            <span class="description">{{ item.weekday }} {{ item.date_label }} · {{ item.relative }}</span>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <span class="title title--small">Geen ophaaldag gepland</span>
+  {% endif %}
+</div>
+
+<div class="title_bar">
+  <img class="image image--adaptive" src="https://trmnl.com/images/plugins/trmnl--render.svg" alt="">
+  <span class="title">Afvalbeheer</span>
+  <span class="instance">{{ collector }}</span>
+</div>
