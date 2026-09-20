@@ -1,0 +1,167 @@
+---
+strategy: polling
+no_screen_padding: 'no'
+dark_mode: 'no'
+static_data:
+polling_verb: get
+framework_version: latest
+serverless_language: python
+polling_url: https://trmnl.com/custom_plugin_example_data.json?collector={{ collector }}&postcode={{ postcode }}&huisnummer={{ huisnummer }}&suffix={{ suffix }}&streetname={{ streetname }}&cityname={{ cityname }}&email={{ email }}
+polling_headers: ''
+polling_body:
+id: 482665
+oauth_enabled: 'false'
+oauth_pkce_enabled: 'no'
+oauth_authorize_url: ''
+oauth_token_url: ''
+oauth_scopes: ''
+oauth_scope_separator: ''
+oauth_refresh_url: ''
+oauth_auth_params: ''
+oauth_token_headers: ''
+oauth_token_site: ''
+oauth_token_params: ''
+oauth_token_request_auth_method: ''
+oauth_body_format: ''
+oauth_token_response_metadata: ''
+oauth_authorization_method: ''
+oauth_refresh_params: ''
+oauth_token_field_name: ''
+oauth_expiry_field_name: ''
+oauth_expiry_strategy: ''
+oauth_fixed_expiry_ms: ''
+custom_fields:
+- keyname: author_bio
+  field_type: author_bio
+  name: Over
+  description: 'Afvalkalender voor Nederlandse inzamelaars, gebaseerd op de Home Assistant <a href="https://github.com/pippyn/Home-Assistant-Sensor-Afvalbeheer">Afvalbeheer</a> collectors. Kies je inzamelaar en vul postcode en huisnummer in. RecycleApp vraagt een straatnaam, Limburg.NET ook een gemeente. Omrin-login is optioneel.
+
+    '
+  category: calendar,environment
+  github_url: https://github.com/pippyn/Home-Assistant-Sensor-Afvalbeheer
+- keyname: collector
+  name: Afvalinzamelaar
+  field_type: select
+  default: circulus
+  description: Inzamelaar van je gemeente, dezelfde namen als in Afvalbeheer.
+  conditional_validation:
+  - when: recycleapp
+    visible:
+    - streetname
+    required:
+    - streetname
+  - when: limburg.net
+    visible:
+    - streetname
+    - cityname
+    required:
+    - streetname
+    - cityname
+  - when: omrin
+    visible:
+    - email
+    - password
+  options:
+  - Circulus
+  - ACV
+  - Afval3xBeter
+  - Afvalstoffendienstkalender
+  - Almere
+  - AlphenAanDenRijn
+  - Amsterdam
+  - AreaReiniging
+  - Assen
+  - Avalex
+  - Avri
+  - BAR
+  - Berkelland
+  - Blink
+  - Cranendonck
+  - Cyclus
+  - DAR
+  - DeAfvalApp
+  - DeFryskeMarren
+  - DenHaag
+  - GAD
+  - Groningen
+  - Hellendoorn
+  - HVC
+  - Limburg.NET
+  - Lingewaard
+  - Meerlanden
+  - Middelburg-Vlissingen
+  - MijnAfvalwijzer
+  - Mijnafvalzaken
+  - Montfoort
+  - Nijkerk
+  - Offalkalinder
+  - Omrin
+  - Oostzaan
+  - PeelEnMaas
+  - PreZero
+  - Purmerend
+  - RAD
+  - RecycleApp
+  - RMN
+  - ROVA
+  - RWM
+  - Saver
+  - Schouwen-Duiveland
+  - Sliedrecht
+  - Spaarnelanden
+  - SudwestFryslan
+  - Tilburg
+  - TwenteMilieu
+  - Uithoorn
+  - Venlo
+  - Venray
+  - Voorschoten
+  - Waalre
+  - Waardlanden
+  - Westland
+  - Woerden
+  - Ximmio
+  - ZRD
+- keyname: postcode
+  name: Postcode
+  field_type: string
+  placeholder: 7206AC
+  description: Nederlandse postcode zonder spatie, of Belgische postcode voor RecycleApp.
+  help_text: Bijvoorbeeld 7206AC of 1140
+- keyname: huisnummer
+  name: Huisnummer
+  field_type: string
+  placeholder: '1'
+  description: Huisnummer van het adres.
+- keyname: suffix
+  name: Toevoeging
+  field_type: string
+  optional: true
+  placeholder: A
+  description: Optionele huisnummertoevoeging, zoals A of bis.
+- keyname: streetname
+  name: Straatnaam
+  field_type: string
+  optional: true
+  placeholder: Bazellaan
+  description: Nodig voor RecycleApp en Limburg.NET.
+- keyname: cityname
+  name: Gemeente
+  field_type: string
+  optional: true
+  placeholder: Hasselt
+  description: Nodig voor Limburg.NET.
+- keyname: email
+  name: E-mail
+  field_type: string
+  optional: true
+  placeholder: naam@example.com
+  description: Optioneel Omrin-account, alleen nodig voor extra app-gegevens.
+- keyname: password
+  name: Wachtwoord
+  field_type: password
+  optional: true
+  description: Optioneel Omrin-wachtwoord. Wordt niet in de polling-URL gezet.
+name: Afvalbeheer
+description: Nederlandse afvalkalender
+refresh_interval: 360
