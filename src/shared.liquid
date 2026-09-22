@@ -1,3 +1,7 @@
 {% comment %}
 Shared Afvalbeheer chrome. TRMNL includes this file for every layout.
+The title bar icon is a bin silhouette so the plugin reads as waste collection at a glance.
 {% endcomment %}
+{%- capture afval_icon -%}
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="#000000" d="M9 2h6v2h6v2H3V4h6V2zM6 8h12l-1.2 13H7.2L6 8z"/></svg>
+{%- endcapture -%}

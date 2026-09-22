@@ -2,6 +2,20 @@
 Waste collectors ported from Home Assistant Afvalbeheer.
 
 https://github.com/pippyn/Home-Assistant-Sensor-Afvalbeheer
+
+Fetch strategies, dispatched by fetch_collections:
+
+- Circulus session: circulus. CB_SESSION cookie on mijn.circulus.nl, then the calendar JSON.
+- MijnAfvalwijzer API: mijnafvalwijzer. appsinput postcodecheck.
+- De Afval App servlet: deafvalapp. Plain-text OPHAALSCHEMA lines.
+- ROVA API: rova. waste-calendar/upcoming.
+- RecycleApp: recycleapp. Needs streetname. Fost Plus zip and street lookup, then collections.
+- Limburg.NET: limburg.net. Needs streetname and cityname. Municipality search, then the public calendar.
+- Omrin login: omrin. Address login (email and password optional), then GraphQL fetchCalendar.
+- Amsterdam open data: amsterdam. afvalwijzer frequency rules expanded into dates.
+- Burgerportaal: assen, bar, groningen, nijkerk, rmn, tilburg. Anonymous Identity Toolkit session, then the organisation calendar.
+- Ximmio API: acv, almere, areareiniging, avalex, avri, blink, hellendoorn, meerlanden, oostzaan, rad, twentemilieu, venlo, waardlanden, westland, woerden, ximmio. FetchAdress plus GetCalendar. avalex, blink, meerlanden, oostzaan, rad, westland, and woerden use wasteprod2api.
+- Opzet REST: alphenaandenrijn, afval3xbeter, afvalstoffendienstkalender, berkelland, cranendonck, cyclus, dar, defryskemarren, denhaag, gad, hvc, lingewaard, middelburg-vlissingen, mijnafvalzaken, montfoort, offalkalinder, peelenmaas, prezero, purmerend, rwm, saver, schouwen-duiveland, sliedrecht, spaarnelanden, sudwestfryslan, uithoorn, venray, voorschoten, waalre, zrd. /rest/adressen, then afvalstromen.
 """
 import json
 import re
