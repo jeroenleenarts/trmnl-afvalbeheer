@@ -1,4 +1,5 @@
-<div class="layout layout--col gap--xlarge portrait:gap--large lg:gap--xxlarge">
+<div class="layout layout--col">
+  <div class="flex flex--col w--full gap--xlarge portrait:gap--large lg:gap--xxlarge">
   {% if error %}
     <div class="flex flex--col gap--small lg:gap--medium">
       <span class="title portrait:title--small lg:title--xlarge">Geen kalender</span>
@@ -24,10 +25,7 @@
   {% else %}
     <span class="title portrait:title--small lg:title--xlarge">Geen ophaaldag gepland</span>
   {% endif %}
+  </div>
 </div>
 
-<div class="title_bar">
-  <img class="image image--adaptive" src="data:image/svg+xml;base64,{{ afval_icon | base64_encode }}" alt="">
-  <span class="title">Afvalbeheer</span>
-  <span class="instance">{{ collector }}{% if address %} · {{ address }}{% endif %}</span>
-</div>
+{% render 'title_bar', collector: collector, address: address %}

@@ -3,19 +3,25 @@ Waste collectors ported from Home Assistant Afvalbeheer.
 
 https://github.com/pippyn/Home-Assistant-Sensor-Afvalbeheer
 
+Polling URLs (settings.yml) fetch single GET responses before this function runs.
+The transform only parses those bodies. It still performs HTTP for collectors
+whose next request depends on a cookie, a login token, or an id from the
+previous response: Circulus, Ximmio, RecycleApp, Limburg.NET, Omrin,
+Burgerportaal, and the Opzet afvalstromen call after the address lookup.
+
 Fetch strategies, dispatched by fetch_collections:
 
 - Circulus session: circulus. CB_SESSION cookie on mijn.circulus.nl, then the calendar JSON.
-- MijnAfvalwijzer API: mijnafvalwijzer. appsinput postcodecheck.
-- De Afval App servlet: deafvalapp. Plain-text OPHAALSCHEMA lines.
-- ROVA API: rova. waste-calendar/upcoming.
+- MijnAfvalwijzer API: mijnafvalwijzer. Polled appsinput postcodecheck. API key comes from the afvalwijzer_key field.
+- De Afval App servlet: deafvalapp. Polled plain-text OPHAALSCHEMA lines.
+- ROVA API: rova. Polled waste-calendar/upcoming.
 - RecycleApp: recycleapp. Needs streetname. Fost Plus zip and street lookup, then collections.
 - Limburg.NET: limburg.net. Needs streetname and cityname. Municipality search, then the public calendar.
 - Omrin login: omrin. Address login (email and password optional), then GraphQL fetchCalendar.
-- Amsterdam open data: amsterdam. afvalwijzer frequency rules expanded into dates.
-- Burgerportaal: assen, bar, groningen, nijkerk, rmn, tilburg. Anonymous Identity Toolkit session, then the organisation calendar.
+- Amsterdam open data: amsterdam. Polled afvalwijzer record; frequency rules are expanded into dates here.
+- Burgerportaal: assen, bar, groningen, nijkerk, rmn, tilburg. Anonymous Identity Toolkit session, then the organisation calendar. API key comes from the burgerportaal_key field.
 - Ximmio API: acv, almere, areareiniging, avalex, avri, blink, hellendoorn, meerlanden, oostzaan, rad, twentemilieu, venlo, waardlanden, westland, woerden, ximmio. FetchAdress plus GetCalendar. avalex, blink, meerlanden, oostzaan, rad, westland, and woerden use wasteprod2api.
-- Opzet REST: alphenaandenrijn, afval3xbeter, afvalstoffendienstkalender, berkelland, cranendonck, cyclus, dar, defryskemarren, denhaag, gad, hvc, lingewaard, middelburg-vlissingen, mijnafvalzaken, montfoort, offalkalinder, peelenmaas, prezero, purmerend, rwm, saver, schouwen-duiveland, sliedrecht, spaarnelanden, sudwestfryslan, uithoorn, venray, voorschoten, waalre, zrd. /rest/adressen, then afvalstromen.
+- Opzet REST: alphenaandenrijn, afval3xbeter, afvalstoffendienstkalender, berkelland, cranendonck, cyclus, dar, defryskemarren, denhaag, gad, hvc, lingewaard, middelburg-vlissingen, mijnafvalzaken, montfoort, offalkalinder, peelenmaas, prezero, purmerend, rwm, saver, schouwen-duiveland, sliedrecht, spaarnelanden, sudwestfryslan, uithoorn, venray, voorschoten, waalre, zrd. Address lookup is polled; afvalstromen still runs here because it needs the bagId.
 """
 import json
 import re
@@ -29,8 +35,6 @@ from uuid import uuid4
 from zoneinfo import ZoneInfo
 
 USER_AGENT = "afvalbeheer-trmnl/0.3"
-AFVALWIJZER_KEY = "5ef443e778f41c4f75c69459eea6e6ae0c2d92de729aa0fc61653815fbd6a8ca"
-BURGERPORTAAL_KEY = "AIzaSyA6NkRqJypTfP-cjWzrZNFJzPUbBaGjOdk"
 BURGERPORTAAL_IDS = {
     "assen": "138204213565303512",
     "bar": "138204213564933497",
@@ -407,6 +411,20 @@ def session_cookie(opener, name: str) -> str:
     return ""
 
 
+def polled_body(payload: dict[str, Any]) -> dict[str, Any]:
+    if not isinstance(payload, dict):
+        return {}
+    return {key: value for key, value in payload.items() if key != "trmnl"}
+
+
+def as_list(prefetched: Any) -> list[Any] | None:
+    if isinstance(prefetched, list):
+        return prefetched
+    if isinstance(prefetched, dict) and isinstance(prefetched.get("data"), list):
+        return prefetched["data"]
+    return None
+
+
 def as_items(code: str, dates: list[Any]) -> list[dict[str, str]]:
     waste_type = map_waste_type(code)
     items = []
@@ -494,9 +512,17 @@ def fetch_ximmio(key: str, postcode: str, huisnummer: str, suffix: str) -> list[
     return items
 
 
-def fetch_opzet(key: str, postcode: str, huisnummer: str, suffix: str) -> list[dict[str, str]]:
+def fetch_opzet(
+    key: str,
+    postcode: str,
+    huisnummer: str,
+    suffix: str,
+    prefetched: Any = None,
+) -> list[dict[str, str]]:
     base = OPZET_URLS[key].rstrip("/")
-    matches = http(f"{base}/rest/adressen/{postcode}-{huisnummer}")
+    matches = as_list(prefetched)
+    if not matches or not isinstance(matches[0], dict) or "bagId" not in matches[0]:
+        matches = http(f"{base}/rest/adressen/{postcode}-{huisnummer}")
     if not isinstance(matches, list) or not matches:
         raise RuntimeError("Adres niet gevonden bij deze inzamelaar.")
     bag_id = matches[0].get("bagId")
@@ -518,15 +544,26 @@ def fetch_opzet(key: str, postcode: str, huisnummer: str, suffix: str) -> list[d
     return items
 
 
-def fetch_afvalwijzer(postcode: str, huisnummer: str, suffix: str) -> list[dict[str, str]]:
-    today = date.today().isoformat()
-    url = (
-        "https://api.mijnafvalwijzer.nl/webservices/appsinput/"
-        f"?apikey={AFVALWIJZER_KEY}&method=postcodecheck&postcode={postcode}"
-        f"&street=&huisnummer={huisnummer}&toevoeging={suffix}"
-        f"&app_name=afvalwijzer&platform=web&afvaldata={today}&langs=nl"
-    )
-    payload = http(url)
+def fetch_afvalwijzer(
+    postcode: str,
+    huisnummer: str,
+    suffix: str,
+    api_key: str,
+    prefetched: Any = None,
+) -> list[dict[str, str]]:
+    if isinstance(prefetched, dict) and any(key in prefetched for key in ("ophaaldagen", "ophaaldagenNext")):
+        payload = prefetched
+    else:
+        if not api_key:
+            raise RuntimeError("Vul de MijnAfvalwijzer API-sleutel in.")
+        today = date.today().isoformat()
+        url = (
+            "https://api.mijnafvalwijzer.nl/webservices/appsinput/"
+            f"?apikey={quote(api_key)}&method=postcodecheck&postcode={postcode}"
+            f"&street=&huisnummer={huisnummer}&toevoeging={suffix}"
+            f"&app_name=afvalwijzer&platform=web&afvaldata={today}&langs=nl"
+        )
+        payload = http(url)
     rows = []
     rows.extend(_nested(payload, "ophaaldagen", "data", default=[]) or [])
     rows.extend(_nested(payload, "ophaaldagenNext", "data", default=[]) or [])
@@ -541,13 +578,20 @@ def fetch_afvalwijzer(postcode: str, huisnummer: str, suffix: str) -> list[dict[
     return items
 
 
-def fetch_deafvalapp(postcode: str, huisnummer: str, suffix: str) -> list[dict[str, str]]:
-    url = (
-        "https://dataservice.deafvalapp.nl/dataservice/DataServiceServlet"
-        f"?service=OPHAALSCHEMA&land=NL&postcode={postcode}&straatId=0"
-        f"&huisnr={huisnummer}&huisnrtoev={suffix}"
-    )
-    text = http(url, as_json=False)
+def fetch_deafvalapp(
+    postcode: str,
+    huisnummer: str,
+    suffix: str,
+    prefetched: Any = None,
+) -> list[dict[str, str]]:
+    text = prefetched.get("data") if isinstance(prefetched, dict) else None
+    if not isinstance(text, str):
+        url = (
+            "https://dataservice.deafvalapp.nl/dataservice/DataServiceServlet"
+            f"?service=OPHAALSCHEMA&land=NL&postcode={postcode}&straatId=0"
+            f"&huisnr={huisnummer}&huisnrtoev={suffix}"
+        )
+        text = http(url, as_json=False)
     items = []
     for line in str(text).strip().splitlines():
         parts = [part.strip() for part in line.split(";")]
@@ -559,12 +603,19 @@ def fetch_deafvalapp(postcode: str, huisnummer: str, suffix: str) -> list[dict[s
     return items
 
 
-def fetch_rova(postcode: str, huisnummer: str, suffix: str) -> list[dict[str, str]]:
-    url = (
-        "https://www.rova.nl/api/waste-calendar/upcoming"
-        f"?houseNumber={huisnummer}&addition={suffix}&postalcode={postcode}&take=10"
-    )
-    payload = http(url)
+def fetch_rova(
+    postcode: str,
+    huisnummer: str,
+    suffix: str,
+    prefetched: Any = None,
+) -> list[dict[str, str]]:
+    payload = as_list(prefetched)
+    if payload is None or not payload or not isinstance(payload[0], dict) or "wasteType" not in payload[0]:
+        url = (
+            "https://www.rova.nl/api/waste-calendar/upcoming"
+            f"?houseNumber={huisnummer}&addition={suffix}&postalcode={postcode}&take=10"
+        )
+        payload = http(url)
     if not isinstance(payload, list):
         raise RuntimeError("Geen ophaaldata gevonden voor dit adres.")
     items = []
@@ -723,17 +774,25 @@ def fetch_omrin(postcode: str, huisnummer: str, suffix: str, email: str, passwor
     return items
 
 
-def fetch_burgerportaal(key: str, postcode: str, huisnummer: str, suffix: str) -> list[dict[str, str]]:
+def fetch_burgerportaal(
+    key: str,
+    postcode: str,
+    huisnummer: str,
+    suffix: str,
+    api_key: str,
+) -> list[dict[str, str]]:
+    if not api_key:
+        raise RuntimeError("Vul de Burgerportaal API-sleutel in.")
     org_id = BURGERPORTAAL_IDS[key]
     signup = http(
-        f"https://www.googleapis.com/identitytoolkit/v3/relyingparty/signupNewUser?key={BURGERPORTAAL_KEY}",
+        f"https://www.googleapis.com/identitytoolkit/v3/relyingparty/signupNewUser?key={quote(api_key)}",
         method="POST",
     )
     token = signup.get("idToken") or signup.get("id_token")
     refresh = signup.get("refreshToken") or signup.get("refresh_token")
     if not token and refresh:
         refreshed = http(
-            f"https://securetoken.googleapis.com/v1/token?key={BURGERPORTAAL_KEY}",
+            f"https://securetoken.googleapis.com/v1/token?key={quote(api_key)}",
             data={"grant_type": "refresh_token", "refresh_token": refresh},
         )
         token = refreshed.get("id_token")
@@ -836,24 +895,32 @@ def _amsterdam_parse_date(value: str, today: date) -> date | None:
     return None
 
 
-def fetch_amsterdam(postcode: str, huisnummer: str, suffix: str) -> list[dict[str, str]]:
+def fetch_amsterdam(
+    postcode: str,
+    huisnummer: str,
+    suffix: str,
+    prefetched: Any = None,
+) -> list[dict[str, str]]:
     base = "https://api.data.amsterdam.nl/v1/afvalwijzer/afvalwijzer/"
-    params = [{"postcode": postcode, "huisnummer": huisnummer}]
-    if suffix:
-        params = [
-            {"postcode": postcode, "huisnummer": huisnummer, "huisletter": suffix.lower()},
-            {"postcode": postcode, "huisnummer": huisnummer, "huisnummertoevoeging": suffix.lower()},
-            {"postcode": postcode, "huisnummer": huisnummer, "huisletter": suffix.upper()},
-            {"postcode": postcode, "huisnummer": huisnummer, "huisnummertoevoeging": suffix.upper()},
-            {"postcode": postcode, "huisnummer": huisnummer},
-        ]
     rows = []
-    for query in params:
-        payload = http(f"{base}?{urlencode(query)}")
-        found = _nested(payload, "_embedded", "afvalwijzer", default=[]) or []
-        if found:
-            rows = found
-            break
+    if isinstance(prefetched, dict):
+        rows = _nested(prefetched, "_embedded", "afvalwijzer", default=[]) or []
+    if not rows:
+        params = [{"postcode": postcode, "huisnummer": huisnummer}]
+        if suffix:
+            params = [
+                {"postcode": postcode, "huisnummer": huisnummer, "huisletter": suffix.lower()},
+                {"postcode": postcode, "huisnummer": huisnummer, "huisnummertoevoeging": suffix.lower()},
+                {"postcode": postcode, "huisnummer": huisnummer, "huisletter": suffix.upper()},
+                {"postcode": postcode, "huisnummer": huisnummer, "huisnummertoevoeging": suffix.upper()},
+                {"postcode": postcode, "huisnummer": huisnummer},
+            ]
+        for query in params:
+            payload = http(f"{base}?{urlencode(query)}")
+            found = _nested(payload, "_embedded", "afvalwijzer", default=[]) or []
+            if found:
+                rows = found
+                break
     if not rows:
         raise RuntimeError("Adres niet gevonden bij Amsterdam.")
 
@@ -907,15 +974,18 @@ def fetch_collections(
     cityname: str = "",
     email: str = "",
     password: str = "",
+    afvalwijzer_key: str = "",
+    burgerportaal_key: str = "",
+    prefetched: Any = None,
 ) -> list[dict[str, str]]:
     if key == "circulus":
         return fetch_circulus(postcode, huisnummer, suffix)
     if key == "mijnafvalwijzer":
-        return fetch_afvalwijzer(postcode, huisnummer, suffix)
+        return fetch_afvalwijzer(postcode, huisnummer, suffix, afvalwijzer_key, prefetched)
     if key == "deafvalapp":
-        return fetch_deafvalapp(postcode, huisnummer, suffix)
+        return fetch_deafvalapp(postcode, huisnummer, suffix, prefetched)
     if key == "rova":
-        return fetch_rova(postcode, huisnummer, suffix)
+        return fetch_rova(postcode, huisnummer, suffix, prefetched)
     if key == "recycleapp":
         return fetch_recycleapp(postcode, huisnummer, streetname)
     if key == "limburg.net":
@@ -923,13 +993,13 @@ def fetch_collections(
     if key == "omrin":
         return fetch_omrin(postcode, huisnummer, suffix, email, password)
     if key == "amsterdam":
-        return fetch_amsterdam(postcode, huisnummer, suffix)
+        return fetch_amsterdam(postcode, huisnummer, suffix, prefetched)
     if key in BURGERPORTAAL_IDS:
-        return fetch_burgerportaal(key, postcode, huisnummer, suffix)
+        return fetch_burgerportaal(key, postcode, huisnummer, suffix, burgerportaal_key)
     if key in XIMMIO_IDS:
         return fetch_ximmio(key, postcode, huisnummer, suffix)
     if key in OPZET_URLS:
-        return fetch_opzet(key, postcode, huisnummer, suffix)
+        return fetch_opzet(key, postcode, huisnummer, suffix, prefetched)
     raise RuntimeError(f"Onbekende inzamelaar: {key}")
 
 
@@ -1005,6 +1075,8 @@ def run(input):
     cityname = field(input, "cityname")
     email = field(input, "email")
     password = field(input, "password")
+    afvalwijzer_key = field(input, "afvalwijzer_key")
+    burgerportaal_key = field(input, "burgerportaal_key")
     address_parts = [streetname, postcode, huisnummer, suffix.upper()]
     address = " ".join(part for part in address_parts if part)
     if cityname:
@@ -1030,6 +1102,9 @@ def run(input):
                 cityname=cityname,
                 email=email,
                 password=password,
+                afvalwijzer_key=afvalwijzer_key,
+                burgerportaal_key=burgerportaal_key,
+                prefetched=polled_body(input),
             ),
             today_in(input),
         )

@@ -1,4 +1,5 @@
-<div class="layout layout--col gap--medium portrait:gap--small lg:gap--large">
+<div class="layout layout--col">
+  <div class="flex flex--col w--full gap--medium portrait:gap--small lg:gap--large">
   {% if error %}
     <span class="title title--small lg:title--large">{{ error }}</span>
   {% elsif next %}
@@ -22,10 +23,7 @@
   {% else %}
     <span class="title title--small lg:title--large">Geen ophaaldag gepland</span>
   {% endif %}
+  </div>
 </div>
 
-<div class="title_bar">
-  <img class="image image--adaptive" src="data:image/svg+xml;base64,{{ afval_icon | base64_encode }}" alt="">
-  <span class="title">Afvalbeheer</span>
-  <span class="instance">{{ collector }}</span>
-</div>
+{% render 'title_bar', collector: collector %}

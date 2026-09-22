@@ -6,7 +6,80 @@ static_data: ''
 polling_verb: get
 framework_version: latest
 serverless_language: python
-polling_url: https://trmnl.com/custom_plugin_example_data.json?collector={{ collector }}&postcode={{ postcode }}&huisnummer={{ huisnummer }}&suffix={{ suffix }}&streetname={{ streetname }}&cityname={{ cityname }}&email={{ email }}
+polling_url: |
+  {% comment %}
+  streetname, cityname, email, and password are read by the transform.
+  {% endcomment %}
+  {% case collector %}
+  {% when "MijnAfvalwijzer" %}
+  https://api.mijnafvalwijzer.nl/webservices/appsinput/?apikey={{ afvalwijzer_key | url_encode }}&method=postcodecheck&postcode={{ postcode | url_encode }}&street=&huisnummer={{ huisnummer | url_encode }}&toevoeging={{ suffix | url_encode }}&app_name=afvalwijzer&platform=web&afvaldata={{ "now" | date: "%Y-%m-%d" }}&langs=nl
+  {% when "DeAfvalApp" %}
+  https://dataservice.deafvalapp.nl/dataservice/DataServiceServlet?service=OPHAALSCHEMA&land=NL&postcode={{ postcode | url_encode }}&straatId=0&huisnr={{ huisnummer | url_encode }}&huisnrtoev={{ suffix | url_encode }}
+  {% when "ROVA" %}
+  https://www.rova.nl/api/waste-calendar/upcoming?houseNumber={{ huisnummer | url_encode }}&addition={{ suffix | url_encode }}&postalcode={{ postcode | url_encode }}&take=10
+  {% when "Amsterdam" %}
+  https://api.data.amsterdam.nl/v1/afvalwijzer/afvalwijzer/?postcode={{ postcode | url_encode }}&huisnummer={{ huisnummer | url_encode }}{% if suffix %}&huisletter={{ suffix | url_encode }}{% endif %}
+  {% when "AlphenAanDenRijn" %}
+  https://afvalkalender.alphenaandenrijn.nl/rest/adressen/{{ postcode | url_encode }}-{{ huisnummer | url_encode }}
+  {% when "Afval3xBeter" %}
+  https://afval3xbeter.nl/rest/adressen/{{ postcode | url_encode }}-{{ huisnummer | url_encode }}
+  {% when "Afvalstoffendienstkalender" %}
+  https://afvalstoffendienst.nl/rest/adressen/{{ postcode | url_encode }}-{{ huisnummer | url_encode }}
+  {% when "Berkelland" %}
+  https://afvalkalender.gemeenteberkelland.nl/rest/adressen/{{ postcode | url_encode }}-{{ huisnummer | url_encode }}
+  {% when "Cranendonck" %}
+  https://afvalkalender.cranendonck.nl/rest/adressen/{{ postcode | url_encode }}-{{ huisnummer | url_encode }}
+  {% when "Cyclus" %}
+  https://cyclusnv.nl/rest/adressen/{{ postcode | url_encode }}-{{ huisnummer | url_encode }}
+  {% when "DAR" %}
+  https://afvalkalender.dar.nl/rest/adressen/{{ postcode | url_encode }}-{{ huisnummer | url_encode }}
+  {% when "DeFryskeMarren" %}
+  https://afvalkalender.defryskemarren.nl/rest/adressen/{{ postcode | url_encode }}-{{ huisnummer | url_encode }}
+  {% when "DenHaag" %}
+  https://huisvuilkalender.denhaag.nl/rest/adressen/{{ postcode | url_encode }}-{{ huisnummer | url_encode }}
+  {% when "GAD" %}
+  https://inzamelkalender.gad.nl/rest/adressen/{{ postcode | url_encode }}-{{ huisnummer | url_encode }}
+  {% when "HVC" %}
+  https://inzamelkalender.hvcgroep.nl/rest/adressen/{{ postcode | url_encode }}-{{ huisnummer | url_encode }}
+  {% when "Lingewaard" %}
+  https://afvalwijzer.lingewaard.nl/rest/adressen/{{ postcode | url_encode }}-{{ huisnummer | url_encode }}
+  {% when "Middelburg-Vlissingen" %}
+  https://afvalwijzer.middelburgvlissingen.nl/rest/adressen/{{ postcode | url_encode }}-{{ huisnummer | url_encode }}
+  {% when "Mijnafvalzaken" %}
+  https://mijnafvalzaken.nl/rest/adressen/{{ postcode | url_encode }}-{{ huisnummer | url_encode }}
+  {% when "Montfoort" %}
+  https://cyclusnv.nl/rest/adressen/{{ postcode | url_encode }}-{{ huisnummer | url_encode }}
+  {% when "Offalkalinder" %}
+  https://www.offalkalinder.nl/rest/adressen/{{ postcode | url_encode }}-{{ huisnummer | url_encode }}
+  {% when "PeelEnMaas" %}
+  https://afvalkalender.peelenmaas.nl/rest/adressen/{{ postcode | url_encode }}-{{ huisnummer | url_encode }}
+  {% when "PreZero" %}
+  https://inzamelwijzer.prezero.nl/rest/adressen/{{ postcode | url_encode }}-{{ huisnummer | url_encode }}
+  {% when "Purmerend" %}
+  https://afvalkalender.purmerend.nl/rest/adressen/{{ postcode | url_encode }}-{{ huisnummer | url_encode }}
+  {% when "RWM" %}
+  https://rwm.nl/rest/adressen/{{ postcode | url_encode }}-{{ huisnummer | url_encode }}
+  {% when "Saver" %}
+  https://saver.nl/rest/adressen/{{ postcode | url_encode }}-{{ huisnummer | url_encode }}
+  {% when "Schouwen-Duiveland" %}
+  https://afvalkalender.schouwen-duiveland.nl/rest/adressen/{{ postcode | url_encode }}-{{ huisnummer | url_encode }}
+  {% when "Sliedrecht" %}
+  https://afvalkalender.sliedrecht.nl/rest/adressen/{{ postcode | url_encode }}-{{ huisnummer | url_encode }}
+  {% when "Spaarnelanden" %}
+  https://afvalwijzer.spaarnelanden.nl/rest/adressen/{{ postcode | url_encode }}-{{ huisnummer | url_encode }}
+  {% when "SudwestFryslan" %}
+  https://afvalkalender.sudwestfryslan.nl/rest/adressen/{{ postcode | url_encode }}-{{ huisnummer | url_encode }}
+  {% when "Uithoorn" %}
+  https://cyclusnv.nl/rest/adressen/{{ postcode | url_encode }}-{{ huisnummer | url_encode }}
+  {% when "Venray" %}
+  https://afvalkalender.venray.nl/rest/adressen/{{ postcode | url_encode }}-{{ huisnummer | url_encode }}
+  {% when "Voorschoten" %}
+  https://afvalkalender.voorschoten.nl/rest/adressen/{{ postcode | url_encode }}-{{ huisnummer | url_encode }}
+  {% when "Waalre" %}
+  https://afvalkalender.waalre.nl/rest/adressen/{{ postcode | url_encode }}-{{ huisnummer | url_encode }}
+  {% when "ZRD" %}
+  https://www.zrd.nl/rest/adressen/{{ postcode | url_encode }}-{{ huisnummer | url_encode }}
+  {% endcase %}
 polling_headers: ''
 polling_body: ''
 id: 482665
@@ -61,6 +134,27 @@ custom_fields:
     visible:
     - email
     - password
+  - when: MijnAfvalwijzer
+    visible:
+    - afvalwijzer_key
+  - when: Assen
+    visible:
+    - burgerportaal_key
+  - when: BAR
+    visible:
+    - burgerportaal_key
+  - when: Groningen
+    visible:
+    - burgerportaal_key
+  - when: Nijkerk
+    visible:
+    - burgerportaal_key
+  - when: RMN
+    visible:
+    - burgerportaal_key
+  - when: Tilburg
+    visible:
+    - burgerportaal_key
   options:
   - Circulus
   - ACV
@@ -162,6 +256,16 @@ custom_fields:
   field_type: password
   optional: true
   description: Optioneel Omrin-wachtwoord. Wordt niet in de polling-URL gezet.
+- keyname: afvalwijzer_key
+  name: MijnAfvalwijzer API-sleutel
+  field_type: string
+  optional: true
+  description: Publieke clientsleutel van MijnAfvalwijzer. Die staat in <a href="https://github.com/pippyn/Home-Assistant-Sensor-Afvalbeheer">Afvalbeheer</a> en wordt niet meegeleverd met deze recipe.
+- keyname: burgerportaal_key
+  name: Burgerportaal API-sleutel
+  field_type: string
+  optional: true
+  description: Publieke Firebase-clientsleutel voor Assen, BAR, Groningen, Nijkerk, RMN en Tilburg. Die staat in <a href="https://github.com/pippyn/Home-Assistant-Sensor-Afvalbeheer">Afvalbeheer</a> en wordt niet meegeleverd met deze recipe.
 name: Afvalbeheer
 description: Nederlandse afvalkalender
 refresh_interval: 360
