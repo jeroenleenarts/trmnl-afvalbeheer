@@ -11,73 +11,73 @@ polling_url: |
   streetname, cityname, email, and password are read by the transform.
   {% endcomment %}
   {% case collector %}
-  {% when "MijnAfvalwijzer" %}
+  {% when "mijnafvalwijzer" %}
   https://api.mijnafvalwijzer.nl/webservices/appsinput/?apikey={{ afvalwijzer_key | url_encode }}&method=postcodecheck&postcode={{ postcode | url_encode }}&street=&huisnummer={{ huisnummer | url_encode }}&toevoeging={{ suffix | url_encode }}&app_name=afvalwijzer&platform=web&afvaldata={{ "now" | date: "%Y-%m-%d" }}&langs=nl
-  {% when "DeAfvalApp" %}
+  {% when "deafvalapp" %}
   https://dataservice.deafvalapp.nl/dataservice/DataServiceServlet?service=OPHAALSCHEMA&land=NL&postcode={{ postcode | url_encode }}&straatId=0&huisnr={{ huisnummer | url_encode }}&huisnrtoev={{ suffix | url_encode }}
-  {% when "ROVA" %}
+  {% when "rova" %}
   https://www.rova.nl/api/waste-calendar/upcoming?houseNumber={{ huisnummer | url_encode }}&addition={{ suffix | url_encode }}&postalcode={{ postcode | url_encode }}&take=10
-  {% when "Amsterdam" %}
+  {% when "amsterdam" %}
   https://api.data.amsterdam.nl/v1/afvalwijzer/afvalwijzer/?postcode={{ postcode | url_encode }}&huisnummer={{ huisnummer | url_encode }}{% if suffix %}&huisletter={{ suffix | url_encode }}{% endif %}
-  {% when "AlphenAanDenRijn" %}
+  {% when "alphenaandenrijn" %}
   https://afvalkalender.alphenaandenrijn.nl/rest/adressen/{{ postcode | url_encode }}-{{ huisnummer | url_encode }}
-  {% when "Afval3xBeter" %}
+  {% when "afval3xbeter" %}
   https://afval3xbeter.nl/rest/adressen/{{ postcode | url_encode }}-{{ huisnummer | url_encode }}
-  {% when "Afvalstoffendienstkalender" %}
+  {% when "afvalstoffendienstkalender" %}
   https://afvalstoffendienst.nl/rest/adressen/{{ postcode | url_encode }}-{{ huisnummer | url_encode }}
-  {% when "Berkelland" %}
+  {% when "berkelland" %}
   https://afvalkalender.gemeenteberkelland.nl/rest/adressen/{{ postcode | url_encode }}-{{ huisnummer | url_encode }}
-  {% when "Cranendonck" %}
+  {% when "cranendonck" %}
   https://afvalkalender.cranendonck.nl/rest/adressen/{{ postcode | url_encode }}-{{ huisnummer | url_encode }}
-  {% when "Cyclus" %}
+  {% when "cyclus" %}
   https://cyclusnv.nl/rest/adressen/{{ postcode | url_encode }}-{{ huisnummer | url_encode }}
-  {% when "DAR" %}
+  {% when "dar" %}
   https://afvalkalender.dar.nl/rest/adressen/{{ postcode | url_encode }}-{{ huisnummer | url_encode }}
-  {% when "DeFryskeMarren" %}
+  {% when "defryskemarren" %}
   https://afvalkalender.defryskemarren.nl/rest/adressen/{{ postcode | url_encode }}-{{ huisnummer | url_encode }}
-  {% when "DenHaag" %}
+  {% when "denhaag" %}
   https://huisvuilkalender.denhaag.nl/rest/adressen/{{ postcode | url_encode }}-{{ huisnummer | url_encode }}
-  {% when "GAD" %}
+  {% when "gad" %}
   https://inzamelkalender.gad.nl/rest/adressen/{{ postcode | url_encode }}-{{ huisnummer | url_encode }}
-  {% when "HVC" %}
+  {% when "hvc" %}
   https://inzamelkalender.hvcgroep.nl/rest/adressen/{{ postcode | url_encode }}-{{ huisnummer | url_encode }}
-  {% when "Lingewaard" %}
+  {% when "lingewaard" %}
   https://afvalwijzer.lingewaard.nl/rest/adressen/{{ postcode | url_encode }}-{{ huisnummer | url_encode }}
-  {% when "Middelburg-Vlissingen" %}
+  {% when "middelburg-vlissingen" %}
   https://afvalwijzer.middelburgvlissingen.nl/rest/adressen/{{ postcode | url_encode }}-{{ huisnummer | url_encode }}
-  {% when "Mijnafvalzaken" %}
+  {% when "mijnafvalzaken" %}
   https://mijnafvalzaken.nl/rest/adressen/{{ postcode | url_encode }}-{{ huisnummer | url_encode }}
-  {% when "Montfoort" %}
+  {% when "montfoort" %}
   https://cyclusnv.nl/rest/adressen/{{ postcode | url_encode }}-{{ huisnummer | url_encode }}
-  {% when "Offalkalinder" %}
+  {% when "offalkalinder" %}
   https://www.offalkalinder.nl/rest/adressen/{{ postcode | url_encode }}-{{ huisnummer | url_encode }}
-  {% when "PeelEnMaas" %}
+  {% when "peelenmaas" %}
   https://afvalkalender.peelenmaas.nl/rest/adressen/{{ postcode | url_encode }}-{{ huisnummer | url_encode }}
-  {% when "PreZero" %}
+  {% when "prezero" %}
   https://inzamelwijzer.prezero.nl/rest/adressen/{{ postcode | url_encode }}-{{ huisnummer | url_encode }}
-  {% when "Purmerend" %}
+  {% when "purmerend" %}
   https://afvalkalender.purmerend.nl/rest/adressen/{{ postcode | url_encode }}-{{ huisnummer | url_encode }}
-  {% when "RWM" %}
+  {% when "rwm" %}
   https://rwm.nl/rest/adressen/{{ postcode | url_encode }}-{{ huisnummer | url_encode }}
-  {% when "Saver" %}
+  {% when "saver" %}
   https://saver.nl/rest/adressen/{{ postcode | url_encode }}-{{ huisnummer | url_encode }}
-  {% when "Schouwen-Duiveland" %}
+  {% when "schouwen-duiveland" %}
   https://afvalkalender.schouwen-duiveland.nl/rest/adressen/{{ postcode | url_encode }}-{{ huisnummer | url_encode }}
-  {% when "Sliedrecht" %}
+  {% when "sliedrecht" %}
   https://afvalkalender.sliedrecht.nl/rest/adressen/{{ postcode | url_encode }}-{{ huisnummer | url_encode }}
-  {% when "Spaarnelanden" %}
+  {% when "spaarnelanden" %}
   https://afvalwijzer.spaarnelanden.nl/rest/adressen/{{ postcode | url_encode }}-{{ huisnummer | url_encode }}
-  {% when "SudwestFryslan" %}
+  {% when "sudwestfryslan" %}
   https://afvalkalender.sudwestfryslan.nl/rest/adressen/{{ postcode | url_encode }}-{{ huisnummer | url_encode }}
-  {% when "Uithoorn" %}
+  {% when "uithoorn" %}
   https://cyclusnv.nl/rest/adressen/{{ postcode | url_encode }}-{{ huisnummer | url_encode }}
-  {% when "Venray" %}
+  {% when "venray" %}
   https://afvalkalender.venray.nl/rest/adressen/{{ postcode | url_encode }}-{{ huisnummer | url_encode }}
-  {% when "Voorschoten" %}
+  {% when "voorschoten" %}
   https://afvalkalender.voorschoten.nl/rest/adressen/{{ postcode | url_encode }}-{{ huisnummer | url_encode }}
-  {% when "Waalre" %}
+  {% when "waalre" %}
   https://afvalkalender.waalre.nl/rest/adressen/{{ postcode | url_encode }}-{{ huisnummer | url_encode }}
-  {% when "ZRD" %}
+  {% when "zrd" %}
   https://www.zrd.nl/rest/adressen/{{ postcode | url_encode }}-{{ huisnummer | url_encode }}
   {% endcase %}
 polling_headers: ''
@@ -134,25 +134,25 @@ custom_fields:
     visible:
     - email
     - password
-  - when: MijnAfvalwijzer
+  - when: mijnafvalwijzer
     visible:
     - afvalwijzer_key
-  - when: Assen
+  - when: assen
     visible:
     - burgerportaal_key
-  - when: BAR
+  - when: bar
     visible:
     - burgerportaal_key
-  - when: Groningen
+  - when: groningen
     visible:
     - burgerportaal_key
-  - when: Nijkerk
+  - when: nijkerk
     visible:
     - burgerportaal_key
-  - when: RMN
+  - when: rmn
     visible:
     - burgerportaal_key
-  - when: Tilburg
+  - when: tilburg
     visible:
     - burgerportaal_key
   options:
