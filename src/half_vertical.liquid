@@ -1,22 +1,20 @@
 <div class="layout layout--col">
-  <div class="flex flex--col w--full gap--medium portrait:gap--small lg:gap--large">
+  <div class="flex flex--col stretch-y w--full gap--[30px] lg:portrait:flex--between">
   {% if error %}
     <span class="title title--small lg:title--large">{{ error }}</span>
   {% elsif next %}
-    <div class="flex flex--col gap--small lg:gap--medium">
-      <span class="label label--underline portrait:label--small lg:label--large">Eerstvolgende</span>
-      <span class="value value--large portrait:value--small lg:value--xxlarge">{{ next.type }}</span>
-      <span class="label label--small lg:label--large">{{ next.relative }}</span>
+    <div class="flex flex--col gap--[0px]">
+      <span class="label label--underline portrait:label--small lg:label--xlarge">Eerstvolgende</span>
+      <span class="value value--xlarge portrait:value--base lg:value--giga lg:portrait:value--xxlarge w--full">{{ next.type }}</span>
+      <span class="label portrait:label--large lg:label--xlarge">{{ next.relative }}</span>
     </div>
 
-    <div class="flex flex--col gap--small lg:gap--medium">
-      {% for item in by_type %}
-        <div class="item">
-          <div class="meta"></div>
-          <div class="content">
-            <span class="title title--small lg:title--base">{{ item.type }}</span>
-            <span class="label label--small{% if item.emphasis == 3 %} label--filled{% elsif item.emphasis == 2 %} label--gray{% endif %} lg:label--base">{{ item.relative }}</span>
-          </div>
+    <div class="flex flex--col w--full gap--[30px] lg:gap--[10px]">
+      {% for item in upcoming limit:2 offset:1 %}
+        <div class="flex flex--col w--full gap--[10px] lg:gap--[30px]">
+          <span class="title title--large lg:value--large">{{ item.type }}</span>
+          <span class="label{% if item.emphasis == 3 %} label--filled{% elsif item.emphasis == 2 %} label--gray{% endif %} portrait:label--large lg:label--xlarge">{{ item.relative }}</span>
+          <span class="label portrait:block portrait:label--large lg:block lg:label--xlarge">{{ item.weekday }} {{ item.date_label }}</span>
         </div>
       {% endfor %}
     </div>

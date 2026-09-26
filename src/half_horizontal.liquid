@@ -1,22 +1,21 @@
 <div class="layout layout--col">
-  <div class="flex flex--col w--full gap--medium portrait:gap--small lg:gap--large">
+  <div class="flex flex--row stretch-y w--full gap--small portrait:flex--col portrait:gap--xsmall lg:gap--xxlarge lg:portrait:flex--row">
   {% if error %}
     <span class="title title--small lg:title--large">{{ error }}</span>
   {% elsif next %}
-    <div class="flex flex--col gap--small lg:gap--medium">
-      <span class="label label--underline portrait:label--small lg:label--large">Eerstvolgende</span>
-      <span class="value value--xlarge portrait:value--large lg:value--xxlarge">{{ next.type }}</span>
-      <span class="label portrait:label--small lg:label--large">{{ next.weekday }} {{ next.date_label }} · {{ next.relative }}</span>
+    <div class="flex flex--col w--full gap--xsmall lg:gap--small">
+      <span class="label label--underline portrait:label--small lg:label--xlarge">Eerstvolgende</span>
+      <span class="value value--xlarge portrait:value--large lg:value--mega lg:portrait:value--xxlarge">{{ next.type }}</span>
+      <span class="label label--medium lg:label--xlarge">{{ next.weekday }} {{ next.date_label }}</span>
+      <span class="label label--medium lg:label--xlarge">{{ next.relative }}</span>
     </div>
 
-    <div class="flex flex--col gap--small lg:gap--medium">
-      {% for item in upcoming limit:3 offset:1 %}
-        <div class="item">
-          <div class="meta"></div>
-          <div class="content">
-            <span class="title title--small lg:title--base">{{ item.type }}</span>
-            <span class="label label--small{% if item.emphasis == 3 %} label--filled{% elsif item.emphasis == 2 %} label--gray{% endif %} lg:label--base">{{ item.weekday }} {{ item.date_label }} · {{ item.relative }}</span>
-          </div>
+    <div class="grid grid--cols-2 portrait:grid--cols-2 gap--large lg:gap--xxlarge">
+      {% for item in upcoming limit:4 offset:1 %}
+        <div class="flex flex--col gap--xsmall lg:gap--xsmall">
+          <span class="title title--large lg:title--xlarge">{{ item.type }}</span>
+          <span class="label label--small lg:label--medium">{{ item.relative }}</span>
+          <span class="label label--small lg:label--medium">{{ item.weekday }} {{ item.date_label }}</span>
         </div>
       {% endfor %}
     </div>
@@ -26,4 +25,4 @@
   </div>
 </div>
 
-{% render 'title_bar', collector: collector %}
+{% render 'title_bar', collector: collector, address: address %}

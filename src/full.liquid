@@ -6,19 +6,19 @@
       <span class="description lg:description--large">{{ error }}</span>
     </div>
   {% elsif next %}
-    <div class="flex flex--col gap--small lg:gap--medium">
+    <div class="flex flex--col gap--small lg:gap--xsmall">
       <span class="label label--underline portrait:label--small lg:label--large">Eerstvolgende</span>
-      <span class="value value--xxlarge portrait:value--large lg:value--giga lg:portrait:value--xlarge">{{ next.type }}</span>
+      <span class="value value--xxlarge portrait:value--large lg:value--giga lg:portrait:value--mega">{{ next.type }}</span>
       <span class="title portrait:title--small lg:title--xlarge">{{ next.weekday }} {{ next.date_label }}</span>
       <span class="label label--large portrait:label--small lg:label--xlarge">{{ next.relative }}</span>
     </div>
 
-    <div class="grid grid--cols-3 portrait:grid--cols-2 gap--large lg:gap--xlarge">
-      {% for item in by_type %}
+    <div class="grid grid--cols-3 portrait:grid--cols-2 gap--large lg:gap--large">
+      {% for item in upcoming limit:6 offset:1 %}
         <div class="flex flex--col gap--xsmall">
-          <span class="label label--small lg:label--base">{{ item.type }}</span>
-          <span class="title title--small lg:title--large">{{ item.relative }}</span>
-          <span class="description lg:description--large">{{ item.weekday }} {{ item.date_label }}</span>
+          <span class="title title--medium lg:title--xlarge">{{ item.type }}</span>
+          <span class="label label--small lg:label--large">{{ item.relative }}</span>
+          <span class="label label--small lg:label--large">{{ item.weekday }} {{ item.date_label }}</span>
         </div>
       {% endfor %}
     </div>
