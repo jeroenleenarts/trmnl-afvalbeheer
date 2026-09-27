@@ -12,7 +12,7 @@
     <div class="flex flex--col w--full gap--[30px] lg:gap--[10px]">
       {% for item in upcoming limit:2 offset:1 %}
         <div class="flex flex--col w--full gap--[10px] lg:gap--[30px]">
-          <span class="title title--large lg:value--large">{{ item.type }}</span>
+          <span class="value lg:value--large">{{ item.type }}</span>
           <span class="label{% if item.emphasis == 3 %} label--filled{% elsif item.emphasis == 2 %} label--gray{% endif %} portrait:label--large lg:label--xlarge">{{ item.relative }}</span>
           <span class="label portrait:block portrait:label--large lg:block lg:label--xlarge">{{ item.weekday }} {{ item.date_label }}</span>
         </div>
