@@ -6,6 +6,15 @@
     <span class="label label--underline lg:label--xlarge">{{ next.relative }}</span>
     <span class="value value--xxlarge lg:value--mega lg:portrait:value--xxlarge">{{ next.type }}</span>
     <span class="label portrait:label--small lg:label--xlarge">{{ next.weekday }} {{ next.date_label }}</span>
+    <div class="flex flex--col w--full gap--[30px] lg:gap--[10px]">
+      {% for item in upcoming limit:1 offset:1 %}
+        <div class="hidden lg:portrait:flex flex--col w--full gap--[10px] lg:gap--[30px]">
+          <span class="title title--large lg:title--xxlarge">{{ item.type }}</span>
+          <span class="label{% if item.emphasis == 3 %} label--filled{% elsif item.emphasis == 2 %} label--gray{% endif %} portrait:label--large lg:label--xlarge">{{ item.relative }}</span>
+          <span class="label portrait:block portrait:label--large lg:block lg:label--xlarge">{{ item.weekday }} {{ item.date_label }}</span>
+        </div>
+      {% endfor %}
+    </div>
   {% else %}
     <span class="title title--small lg:title--base">Geen ophaaldag</span>
   {% endif %}
