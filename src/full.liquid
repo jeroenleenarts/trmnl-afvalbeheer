@@ -16,9 +16,9 @@
     <div class="grid grid--cols-3 portrait:grid--cols-2 gap--large lg:gap--large">
       {% for item in upcoming limit:6 offset:1 %}
         <div class="flex flex--col gap--xsmall">
-          <span class="title title--medium lg:title--xlarge">{{ item.type }}</span>
-          <span class="label label--small lg:label--large">{{ item.relative }}</span>
-          <span class="label label--small lg:label--large">{{ item.weekday }} {{ item.date_label }}</span>
+          <span class="title title--medium lg:title--xlarge lg:portrait:title--xxlarge">{{ item.type }}</span>
+          <span class="label label--small lg:label--large lg:portrait:label--xlarge">{{ item.relative }}</span>
+          <span class="label label--small lg:label--large lg:portrait:label--xlarge">{{ item.weekday }} {{ item.date_label }}</span>
         </div>
       {% endfor %}
     </div>
